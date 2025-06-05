@@ -45,7 +45,7 @@ export default function LoginPage() {
       </Link>
       <Button
         type="submit"
-        className="w-full bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary-hover mt-6 transition duration-300"
+        className="w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary-hover mt-6 transition duration-300"
       >
         Iniciar sesión
       </Button>

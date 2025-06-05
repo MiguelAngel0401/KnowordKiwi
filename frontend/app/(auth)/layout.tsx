@@ -9,7 +9,7 @@ export default function AuthLayout({
         <h1 className="text-xl font-bold mr-auto">KnoWord</h1>
         <ul className="flex space-x-4">
           <li>
-            <button className="px-4 py-2 bg-secondary text-color-text font-bold rounded-xl hover:bg-secondary-hover transition duration-300">
+            <button className="px-4 py-2 bg-secondary text-color-text font-bold rounded hover:bg-secondary-hover transition duration-300">
               Registrate
             </button>
           </li>
@@ -19,7 +19,7 @@ export default function AuthLayout({
         {children}
       </main>
       <footer className="w-full bg-gray-900 text-color-text text-center p-8 mt-8 flex text-sm font-light">
-        <p className="">© 2023 KnoWord || Un trabajo de AlphaTech 🦙</p>
+        <p className="">© 2025 KnoWord || Un trabajo de AlphaTech 🦙</p>
         <div className="flex space-x-4 ml-auto">
           <p>Términos y condiciones</p>
           <p>Politica de privacidad</p>
