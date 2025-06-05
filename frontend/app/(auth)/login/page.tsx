@@ -11,15 +11,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .email("El correo no es válido. Verifica que esté bien escrito."),
-  password: z
-    .string()
-    .min(8, "Tu contraseña debe tener al menos 8 caracteres."),
-});
+import { loginSchema } from "../schemas";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
