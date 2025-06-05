@@ -10,11 +10,14 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
+    "@hookform/resolvers": "^5.0.1",
     "lucide-react": "^0.511.0",
     "next": "15.3.3",
     "prettier": "^3.5.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.57.0",
+    "zod": "^3.25.51"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
