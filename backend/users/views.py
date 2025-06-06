@@ -1,4 +1,5 @@
 
+
 from django.shortcuts import render
 
 from django.http import HttpResponse
@@ -10,6 +11,8 @@ import uuid
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import UserLoginSerializer
 from .models import User
 
 class RegisterView(APIView):
@@ -50,4 +53,18 @@ class RegisterView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         #Apartir de aqui porgramas la logica del loginview va 
+
+
+class LoginView(APIView):
+    def post(self, request):
+
+        serializer = UserLoginSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
