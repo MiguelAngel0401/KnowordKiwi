@@ -1,16 +1,14 @@
-<<<<<<< HEAD
+
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 import uuid
 
 
-=======
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 import uuid
 
->>>>>>> 84b0af2340e4302f70c3d35fd5d4dba17ecaa9ea
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, real_name, password=None):
         if not email:
@@ -46,7 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-<<<<<<< HEAD
+
 
     objects = CustomUserManager()
 
@@ -55,8 +53,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-=======
->>>>>>> 84b0af2340e4302f70c3d35fd5d4dba17ecaa9ea
 
     objects = CustomUserManager()
 
