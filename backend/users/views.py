@@ -42,3 +42,27 @@ class RegisterView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         #Apartir de aqui porgramas la logica del loginview va 
+
+class LoginView(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            email = data.get('email')
+            password = data.get('password')
+
+            if not email or not password:
+                return Response({'error': 'Correo electrónico y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+
+            user = User.objects.filter(email=email).first()
+
+            if not user or not user.check_password(password):
+                return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
+
+            if not user.is_active:
+                return Response({'error': 'Esta cuenta está desactivada'}, status=status.HTTP_403_FORBIDDEN)
+
+            return Response({'message': 'Inicio de sesión exitoso', 'user_id': str(user.id)}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print("Error en el servidor:", str(e))
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
