@@ -2,6 +2,8 @@ import uuid
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import UserLoginSerializer
 from .models import User
 
 class RegisterView(APIView):
@@ -43,26 +45,16 @@ class RegisterView(APIView):
         
         #Apartir de aqui porgramas la logica del loginview va 
 
+
 class LoginView(APIView):
     def post(self, request):
-        try:
-            data = request.data
-            email = data.get('email')
-            password = data.get('password')
 
-            if not email or not password:
-                return Response({'error': 'Correo electrónico y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-            user = User.objects.filter(email=email).first()
-
-            if not user or not user.check_password(password):
-                return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
-
-            if not user.is_active:
-                return Response({'error': 'Esta cuenta está desactivada'}, status=status.HTTP_403_FORBIDDEN)
-
-            return Response({'message': 'Inicio de sesión exitoso', 'user_id': str(user.id)}, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            print("Error en el servidor:", str(e))
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = UserLoginSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
