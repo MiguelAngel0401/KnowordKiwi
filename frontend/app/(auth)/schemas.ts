@@ -27,3 +27,9 @@ export const registerSchema = z.object({
     .string()
     .max(160, "Tu biografía no puede tener más de 160 caracteres."),
 });
+
+export const resetPasswordSchema = z.object({
+  email: z
+    .string()
+    .email("El correo no es válido. Verifica que esté bien escrito."),
+});
