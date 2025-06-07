@@ -1,66 +1,45 @@
-
-
 from django.shortcuts import render
-
 from django.http import HttpResponse
-
-def home(request):
-    return HttpResponse("¡Pruebas Users!")
-
+from django.utils import timezone
 import uuid
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserLoginSerializer
-from .models import User
 
+from .models import User
+from .serializers import UserLoginSerializer, UserRegistrationSerializer
+
+# Vista de prueba
+def home(request):
+    return HttpResponse("¡Pruebas Users!")
+
+
+# Vista de registro
 class RegisterView(APIView):
     def post(self, request):
-        try:
-            data = request.data
-
-            email = data.get('email')
-            username = data.get('username')
-            real_name = data.get('real_name')
-            password = data.get('password')
-
-            if not all([email, username, real_name, password]):
-                return Response({'error': 'Todos los campos deben estar llenos'}, status=status.HTTP_400_BAD_REQUEST)
-
-            if User.objects.filter(email=email).exists():
-                return Response({'error': 'El correo electrónico ya está registrado'}, status=status.HTTP_400_BAD_REQUEST)
-
-            if User.objects.filter(username=username).exists():
-                return Response({'error': 'El nombre de usuario ya existe'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Marcos esta funcion crea el usuario sin el token
-            user = User.objects.create_user(
-                email=email,
-                username=username,
-                real_name=real_name,
-                password=password
-            )
-
-            # Ahora aqui guarda el token del usuario
-            user.email_verification_token = str(uuid.uuid4())
-            user.save()
-
-            return Response({'message': 'Usuario registrado correctamente.', 'user_id': str(user.id)}, status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            print("Error en el servidor:", str(e))
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        #Apartir de aqui porgramas la logica del loginview va 
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'Usuario registrado correctamente. Revisa tu correo para verificar tu cuenta.'
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# Vista de login
 class LoginView(APIView):
     def post(self, request):
-
         serializer = UserLoginSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             user = serializer.validated_data['user']
+
+            # Opcional: evitar login si no ha verificado su correo
+            if not user.is_email_verified:
+                return Response({'error': 'Por favor verifica tu correo antes de iniciar sesión.'},
+                                status=status.HTTP_403_FORBIDDEN)
+
             refresh = RefreshToken.for_user(user)
             return Response({
                 'access': str(refresh.access_token),
@@ -68,3 +47,22 @@ class LoginView(APIView):
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# Vista de verificación de correo
+class VerifyEmailView(APIView):
+    def get(self, request, token):
+        try:
+            user = User.objects.get(email_verification_token=token)
+
+            if user.email_verification_expires_at and user.email_verification_expires_at < timezone.now():
+                return Response({'error': 'El token de verificación ha expirado.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.is_email_verified = True
+            user.email_verification_token = None
+            user.email_verification_expires_at = None
+            user.save()
+
+            return Response({'message': 'Correo verificado correctamente.'}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({'error': 'Token inválido o usuario no encontrado.'}, status=status.HTTP_400_BAD_REQUEST)
