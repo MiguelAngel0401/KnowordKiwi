@@ -38,9 +38,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     email_verification_expires_at = models.DateTimeField(blank=True, null=True)
     password_reset_token = models.CharField(max_length=255, blank=True, null=True)
     password_reset_expires_at = models.DateTimeField(blank=True, null=True)
-    create_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(blank=True, null=True)
     
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -54,10 +54,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
-    objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'real_name']
-
-    def __str__(self):
-        return self.email

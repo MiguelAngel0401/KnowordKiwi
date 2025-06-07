@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'rest_framework',
+    'rest_framework_simplejwt',
     'users'
 ]
 
@@ -83,8 +84,12 @@ WSGI_APPLICATION = 'backend_knowordkiwi.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'knoword_test',
+        'USER': 'postgres',     
+        'PASSWORD': '3742', 
+        'HOST': 'localhost',         
+        'PORT': '5433',              
     }
 }
 
