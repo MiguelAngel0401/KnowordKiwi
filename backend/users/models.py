@@ -1,21 +1,19 @@
-
-
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db import models
 import uuid
-
-
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-import uuid
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, real_name, password=None):
         if not email:
-            raise ValueError('El email es obligatorio')
+            raise ValueError("El email es obligatorio")
         email = self.normalize_email(email)
         user = self.model(email=email, username=username, real_name=real_name)
-        user.set_password(password) 
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -25,6 +23,7 @@ class CustomUserManager(BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -40,20 +39,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     password_reset_expires_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(blank=True, null=True)
-    
+    deleted_at = models.BooleanField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "real_name"]
+
+    def __str__(self):
+        return str(self.email) if self.email is not None else ""
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'real_name']
-
-    def __str__(self):
-        return self.email
-
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'real_name']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "real_name"]
