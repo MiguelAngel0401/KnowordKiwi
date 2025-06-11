@@ -9,17 +9,42 @@ from .serializers import UserLoginSerializer, UserRegistrationSerializer
 
 User = get_user_model()
 
+#UwU
 
 # Vista de registro
+import secrets
+from django.core.mail import send_mail
+from django.conf import settings
+from django.urls import reverse
+
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+
+            # Generar token de verificación
+            token = secrets.token_urlsafe(32)
+            user.email_verification_token = token
+            user.email_verification_expires_at = timezone.now() + timezone.timedelta(hours=24)
+            user.save()
+
+            # Construir URL de verificación
+            verification_url = request.build_absolute_uri(
+                reverse("verify-email", args=[token])
+            )
+
+            # Enviar correo de verificación
+            send_mail(
+                subject="Verifica tu correo electrónico",
+                message=f"Hola {user.username}, por favor verifica tu correo haciendo clic en el siguiente enlace:\n{verification_url}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
             return Response(
-                {
-                    "message": "Usuario registrado correctamente. Revisa tu correo para verificar tu cuenta."
-                },
+                {"message": "Usuario registrado correctamente. Revisa tu correo para verificar tu cuenta."},
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
