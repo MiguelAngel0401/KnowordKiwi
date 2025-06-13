@@ -1,11 +1,15 @@
-from rest_framework import serializers
-from django.contrib.auth import authenticate
-from .models import User
-from django.core.mail import send_mail
-from django.utils import timezone
-from datetime import timedelta
 import uuid
+from datetime import timedelta
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+User = get_user_model()
 
 
 # Serializdor de Login
@@ -65,19 +69,30 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.email_verification_expires_at = timezone.now() + timedelta(hours=24)
         user.save()
 
-        # Construir el enlace de verificación
-        verification_url = (
+        # Enviar correo
+        subject = "Confirma tu cuenta de KnoWord"
+        confirmation_link = (
             f"http://localhost:8000/api/verify-email/{user.email_verification_token}/"
         )
 
-        # Enviar correo
-        send_mail(
-            subject="Verifica tu correo",
-            message=f"Hola {user.username}, haz clic en el siguiente enlace para verificar tu correo:\n{verification_url}",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
+        html_message = render_to_string(
+            "emails/confirmation_email.html",
+            {"user": user, "confirmation_link": confirmation_link},
         )
+        plain_message = strip_tags(html_message)
+
+        try:
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            print("Correo enviado a", user.email)
+        except Exception as e:
+            print("Error al enviar el correo:", e)
 
         return user
 

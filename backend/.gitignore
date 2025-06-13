@@ -1,6 +1,6 @@
 # Ignorar entornos virtuales
 env/
-
+.env
 # Ignorar archivos pyc y cachés de Python
 __pycache__/
 *.py[cod]
